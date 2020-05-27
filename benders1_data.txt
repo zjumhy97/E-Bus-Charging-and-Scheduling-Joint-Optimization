@@ -1,0 +1,198 @@
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 4
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
+Iteration: 1
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 2
+z.x = 0.0
+SP_Dual_obj[0] = 9999
+SP_Dual: UNBOUNDED
+
+
+Iteration: 3
+z.x = 8.0
+SP_Dual_obj[0] = 8.0
+SP_Dual: OPTIMAL
+
+
