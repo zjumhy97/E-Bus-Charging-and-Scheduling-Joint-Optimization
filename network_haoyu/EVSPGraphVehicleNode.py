@@ -4,17 +4,17 @@ import network_haoyu.Graph as Graph
 # 3 class vertex: trip vertex, origin/destination vertex, virtual vehicle vertex
 
 class EVSPGraph(Graph.Graph):
-    def __init__(self, time_granularity, soc_ev, trip_info):
+    def __init__(self, time_granularity, soc_ev, trip_info, start_time, end_time):
         super(EVSPGraph, self).__init__()
         # 时间粒度这里可能有问题，具体用到这个变量的时候再 check 一下
         # time_granularity > 1
         self.time_granularity = time_granularity  # 15 min
         self.soc_ev = soc_ev
         self.vehicle_num = len(soc_ev)
-        self.start_time = None
-        self.start_time_str = None
-        self.end_time = None
-        self.end_time_str = None
+        self.start_time = start_time
+        self.start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
+        self.end_time = end_time
+        self.end_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
         self.pull_out_edge_list = []
         self.trip_info = trip_info
 
@@ -100,7 +100,7 @@ class EVSPGraph(Graph.Graph):
         self.update()
         return 0
 
-    def construct_graph(self, vertex_info):
+    def construct_graph(self):
         # construct graph process:
         # 1. add origin vertex
         self.add_depot_vertex(attribute='origin')
