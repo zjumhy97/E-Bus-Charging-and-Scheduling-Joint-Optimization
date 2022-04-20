@@ -23,13 +23,12 @@ class Vertex():
 
 
 class Edge():
-    def __init__(self, vertex_end1, vertex_end2, directed=True, weight=1, attribute=None):
+    def __init__(self, vertex_end1, vertex_end2, directed=True, weight=1):
         self.end1 = vertex_end1
         self.end2 = vertex_end2
         self.directed = directed
         self.weight = weight
         self.vertex_id_pair = [vertex_end1.vertex_id, vertex_end2.vertex_id]
-        self.attribute = attribute
         if self.directed:
             self.start = vertex_end1
             self.end = vertex_end2
