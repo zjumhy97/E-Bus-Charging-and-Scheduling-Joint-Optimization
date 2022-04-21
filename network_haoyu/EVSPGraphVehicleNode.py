@@ -119,6 +119,40 @@ class EVSPGraph(Graph.Graph):
         self.add_depot_vertex(attribute='destination')
         return 0
 
+    def electricity_price(self, charging_time_str, mode='TOU'):
+        if mode == 'TOU':
+            peak_price = 1.02756875
+            flat_price = 0.67506875
+            valley_price = 0.23106875
+
+            # int(time.mktime(time.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")))
+            # time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(time_index))
+
+            initial_time_str = charging_time_str[0:11] + '00:00:00'
+            initial_time = int(time.mktime(time.strptime(initial_time_str, "%Y-%m-%d %H:%M:%S")))
+            charging_time = int(time.mktime(time.strptime(charging_time_str, "%Y-%m-%d %H:%M:%S")))
+            time_difference = charging_time - initial_time
+            if time_difference >= 0 and time_difference < 25200: # 00:00 - 07:00
+                price = valley_price
+            elif time_difference >= 25200 and time_difference < 32400: # 07:00 - 09:00
+                price = flat_price
+            elif time_difference >= 32400 and time_difference < 41400:  # 09:00 - 11:30
+                price = peak_price
+            elif time_difference >= 41400 and time_difference < 50400: # 11:30 - 14:00
+                price = flat_price
+            elif time_difference >= 50400 and time_difference < 59400:  # 14:00 - 16:30
+                price = peak_price
+            elif time_difference >= 59400 and time_difference < 68400: # 16:30 - 19:00
+                price = flat_price
+            elif time_difference >= 68400 and time_difference < 75600:  # 19:00 - 21:00
+                price = peak_price
+            elif time_difference >= 75600 and time_difference < 82800: # 21:00 - 23:00
+                price = flat_price
+            else:
+                price = valley_price
+            return price
+        else:
+            return 'electricity price error!'
 
 class EVSPVertex(Graph.Vertex):
     def __init__(self, vertex_id, vertex_attribute, start_time_str, duration):
