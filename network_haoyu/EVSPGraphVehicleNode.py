@@ -48,6 +48,7 @@ class EVSPGraph(Graph.Graph):
             self.update()
             vertex_destination = self.add_vertex(id=self.vertex_size,attribute='destination',
                                                 start_time_str=self.end_time_str, duration=1)
+            vertex_destination.energy_consumption = 0
             # add the edge compatible with vertex_destination
             self.add_edge(vertex=vertex_destination, attribute='pull in')
         else:
