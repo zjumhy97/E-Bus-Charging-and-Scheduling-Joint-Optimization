@@ -18,6 +18,13 @@ if os.path.exists(graph_file_path + 'vehicle_4_trip_6.pickle'):
         graph = graph[0]
 
 vertex_size, edge_size = graph.graphSize()
+time_slot_num = int(24 * 60 / graph.time_granularity)
+s_upper = 100
+s_lower = 10
+M = 1000000
+q_upper = 5
+q_total_upper = 15
+
 
 model = gp.Model()
 x = model.addVars(edge_size, vtype=GRB.BINARY, name="x")
@@ -25,7 +32,7 @@ s = model.addVars(vertex_size, vtype=GRB.CONTINUOUS, name="s")
 w = model.addVars(edge_size, lb=0, vtype=GRB.CONTINUOUS, name="w")
 m = model.addVars(edge_size, lb=0, vtype=GRB.CONTINUOUS, name="m")
 c = model.addVars(edge_size, lb=0, vtype=GRB.CONTINUOUS, name="c")
-q = model.addVars(edge_size, )
+q = model.addVars(edge_size, time_slot_num, lb=0, ub=q_upper, vtype=GRB.CONTINUOUS, name='q')
 model.update()
 # model.setParam('Method', 2)
 # model.setParam('DegenMoves', 0)
@@ -35,10 +42,6 @@ b = np.array([vehicle_num])
 b = np.append(b, np.zeros(vertex_size-2))
 b = np.append(b, [-vehicle_num])
 # b = np.array([1] + [0 for i in range(len(vertex_info)-1)] + [-1])
-
-s_upper = 100
-s_lower = 10
-M = 1000000
 
 # flow constraints
 for j in range(vertex_size):
@@ -78,7 +81,17 @@ for i in range(edge_size):
 
 
 # charging constraints
+for i in range(edge_size):
+    initial_time_str = graph.edge_set[i].end1.start_time_str[0:11] + '00:00:00'
+    initial_time = int(time.mktime(time.strptime(initial_time_str, "%Y-%m-%d %H:%M:%S")))
+    toi = graph.edge_set[i].end1.start_time
+    doi = graph.edge_set[i].end1.duration
+    index = int((toi + doi - initial_time)/graph.time_granularity / 60)
+    model.addConstr(c[i] == gp.quicksum(q[i, t] for t in range(index, time_slot_num)))
 
+
+for t in range(time_slot_num):
+    model.addConstr(gp.quicksum(q[i, t] for i in range(edge_size)) <= q_total_upper)
 
 model.setObjective(gp.quicksum(x[i] * graph.edge_set[i].weight for i in range(edge_size)), GRB.MINIMIZE)
 
@@ -119,8 +132,8 @@ for k in range(vehicle_num):
                 if x[i].x == 1:
                     # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
                     path_k.append(
-                        str(graph.edge_set[i].end2.vertex_id) + ':' + str(c[i].x))
-                    path_k.append(graph.edge_set[i].end2.vertex_id)
+                        str(c[i].x) + ':' + str(graph.edge_set[i].end2.vertex_id))
+                    # path_k.append(graph.edge_set[i].end2.vertex_id)
                     next_vertex_id = graph.edge_set[i].end2.vertex_id
                     break
     print(path_k)
