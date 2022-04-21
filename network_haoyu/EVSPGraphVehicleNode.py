@@ -32,7 +32,8 @@ class EVSPGraph(Graph.Graph):
         for i in range(1, trip_number+1):
             trip = self.trip_info['trip' + str(i)]
             vertex = self.add_vertex(id=trip['trip_id'] + self.vehicle_num, attribute=trip['attribute'],
-                                    start_time_str=trip['start_time_str'], duration=trip['duration'])
+                                     start_time_str=trip['start_time_str'], duration=trip['duration'])
+            vertex.energy_consumption = trip['energy_consumption']
             self.add_edge(vertex=vertex, attribute='normal')
         return 0
 
@@ -41,7 +42,7 @@ class EVSPGraph(Graph.Graph):
         if attribute == 'origin':
             # [3, 'task', '2022-03-24 07:30:00', 45]
             vertex_origin = self.add_vertex(id=0, attribute='origin',
-                                           start_time_str=self.start_time_str, duration=1)
+                                            start_time_str=self.start_time_str, duration=1)
         elif attribute == 'destination':
             # vertex_list = [900000, 'destination', self.end_time_str, 1]
             self.update()
@@ -128,6 +129,7 @@ class EVSPVertex(Graph.Vertex):
         self.duration = duration * 60
         # 设置为 None 是否合理？
         self.soc = None
+        self.energy_consumption = None
 
 class EVSPEdge(Graph.Edge):
     def __init__(self, edge_id, attribute, end1, end2, directed=True, weight=1):

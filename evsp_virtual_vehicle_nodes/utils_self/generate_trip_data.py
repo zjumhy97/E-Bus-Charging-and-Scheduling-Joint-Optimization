@@ -24,7 +24,8 @@ class TripDataSameGap():
             trip['trip' + str(i)] = {"trip_id": i,
                                      "attribute": "task",
                                      "start_time_str": start_time_str,
-                                     "duration": self.duration}
+                                     "duration": self.duration,
+                                     "energy_consumption": 30}
             # (trip_list['trip' + str(i)])
             start_time = int(time.mktime(time.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")))
             start_time += self.gap * 60

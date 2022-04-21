@@ -8,7 +8,7 @@ import evsp_virtual_vehicle_nodes.utils_self.generate_trip_data as TripData
 # Parameters
 data_file_path = '../trip_data/'
 graph_file_path = '../graph_generated/'
-trip_number = 6
+trip_num = 6
 gap = 15
 duration = 45
 soc_ev = {'粤B12345':100, '粤B23456':100, '粤B34567':100, '粤B45678':100}
@@ -23,9 +23,9 @@ end_time = int(time.mktime(time.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")))
 
 
 trip_data = TripData.TripDataSameGap(start_time_str=start_time_str_trip, gap=gap,
-                                     duration=duration, trip_number=trip_number)
+                                     duration=duration, trip_number=trip_num)
 trip_data.generate(data_file_path=data_file_path)
-file = open(data_file_path + 'trip_' + str(trip_number) + '_gap_' + str(gap) + '_dura_'
+file = open(data_file_path + 'trip_' + str(trip_num) + '_gap_' + str(gap) + '_dura_'
                 + str(duration)+'.json', 'r')
 
 trip_info = json.load(file)
@@ -34,7 +34,7 @@ graph = EGraph.EVSPGraph(time_granularity=5, soc_ev=soc_ev, trip_info=trip_info,
                          start_time=start_time_graph, end_time=end_time)
 graph.construct_graph()
 
-with open(graph_file_path + 'vehicle_' + str(len(soc_ev)) + '_trip_' + str(trip_number) + '.pickle', 'wb') as f:
+with open(graph_file_path + 'vehicle_' + str(len(soc_ev)) + '_trip_' + str(trip_num) + '.pickle', 'wb') as f:
     pickle.dump([graph], f)
 
 
