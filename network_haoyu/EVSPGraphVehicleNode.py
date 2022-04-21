@@ -17,6 +17,7 @@ class EVSPGraph(Graph.Graph):
         self.end_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(end_time))
         self.pull_out_edge_list = []
         self.trip_info = trip_info
+        self.edge_dict = {}
 
     def add_vertex(self, id, attribute, start_time_str, duration):
         # 向 vertex_set 中添加 vertex
@@ -89,11 +90,13 @@ class EVSPGraph(Graph.Graph):
                 edge = self.edge_set.append(EVSPEdge(edge_id=edge_id, attribute=attribute, end1=i, end2=vertex))
                 i.edge_id_out.append(edge_id)
                 vertex.edge_id_in.append(edge_id)
+                self.edge_dict[(i.vertex_id, vertex.vertex_id)] = edge_id
                 edge_id += 1
             elif vertex.start_time + vertex.duration <= i.start_time:
                 edge = self.edge_set.append(EVSPEdge(edge_id=edge_id, attribute=attribute, end1=vertex, end2=i))
                 vertex.edge_id_out.append(edge_id)
                 i.edge_id_in.append(edge_id)
+                self.edge_dict[(vertex.vertex_id, i.vertex_id)] = edge_id
                 edge_id += 1
             else:
                 pass
@@ -125,7 +128,7 @@ class EVSPVertex(Graph.Vertex):
         self.soc = None
 
 class EVSPEdge(Graph.Edge):
-    def __init__(self, edge_id, attribute, end1, end2, directed=True, weight=0):
+    def __init__(self, edge_id, attribute, end1, end2, directed=True, weight=1):
         super(EVSPEdge, self).__init__(vertex_end1=end1, vertex_end2=end2, directed=directed, weight=weight)
         self.edge_id = edge_id
         self.attribute = attribute # attribute: pull out, normal, pull in
