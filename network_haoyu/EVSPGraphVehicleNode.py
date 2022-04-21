@@ -31,7 +31,7 @@ class EVSPGraph(Graph.Graph):
         trip_number = len(self.trip_info)
         for i in range(1, trip_number+1):
             trip = self.trip_info['trip' + str(i)]
-            vertex = self.add_vertex(id=trip['trip_id'], attribute=trip['attribute'],
+            vertex = self.add_vertex(id=trip['trip_id'] + self.vehicle_num, attribute=trip['attribute'],
                                     start_time_str=trip['start_time_str'], duration=trip['duration'])
             self.add_edge(vertex=vertex, attribute='normal')
         return 0
@@ -44,7 +44,8 @@ class EVSPGraph(Graph.Graph):
                                            start_time_str=self.start_time_str, duration=1)
         elif attribute == 'destination':
             # vertex_list = [900000, 'destination', self.end_time_str, 1]
-            vertex_destination = self.add_vertex(id=900000, attribute='destination',
+            self.update()
+            vertex_destination = self.add_vertex(id=self.vertex_size,attribute='destination',
                                                 start_time_str=self.end_time_str, duration=1)
             # add the edge compatible with vertex_destination
             self.add_edge(vertex=vertex_destination, attribute='pull in')
@@ -69,7 +70,8 @@ class EVSPGraph(Graph.Graph):
                 start_time = self.start_time + vertex_origin.duration
                 start_time_str = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(start_time))
                 # vertex_list = [i+100001, vehicle, start_time_str, 1]
-                vertex_vehicle = self.add_vertex(id=i+100001, attribute=vehicle, start_time_str=start_time_str, duration=1)
+                vertex_vehicle = self.add_vertex(id=i+1, attribute=vehicle, start_time_str=start_time_str,
+                                                 duration=1)
                 vertex_vehicle.soc = soc
                 i += 1
                 self.add_edge(vertex=vertex_vehicle, attribute='pull out')
