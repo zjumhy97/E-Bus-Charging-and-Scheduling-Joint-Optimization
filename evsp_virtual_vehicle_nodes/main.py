@@ -7,8 +7,7 @@ import copy
 import sys
 import time
 
-vehicle_num = 40
-trip_num = 193
+trip_num = 50 # 193 50
 soc_ev = {'粤B12345': 100,
           '粤B13456': 90,
           '粤B14567': 80,
@@ -24,43 +23,93 @@ soc_ev = {'粤B12345': 100,
           '粤B24567': 80,
           '粤B25678': 70,
           '粤B26789': 80,
-          '粤B27890': 70,
-          '粤B28901': 70,
-          '粤B29012': 80,
-          '粤B20123': 70,
-          '粤B21234': 70,
-          '粤B32345': 100,
-          '粤B33456': 90,
-          '粤B34567': 80,
-          '粤B35678': 70,
-          '粤B36789': 80,
-          '粤B37890': 70,
-          '粤B38901': 70,
-          '粤B39012': 80,
-          '粤B30123': 70,
-          '粤B31234': 70,
-          '粤B42345': 100,
-          '粤B43456': 90,
-          '粤B44567': 80,
-          '粤B45678': 70,
-          '粤B46789': 80,
-          '粤B47890': 70,
-          '粤B48901': 70,
-          '粤B49012': 80,
-          '粤B40123': 70,
-          '粤B51234': 70,
+          # '粤B27890': 70,
+          # '粤B28901': 70,
+          # '粤B29012': 80,
+          # '粤B20123': 70,
+          # '粤B21234': 70,
+          # '粤B32345': 100,
+          # '粤B33456': 90,
+          # '粤B34567': 80,
+          # '粤B35678': 70,
+          # '粤B36789': 80,
+          # '粤B37890': 70,
+          # '粤B38901': 70,
+          # '粤B39012': 80,
+          # '粤B30123': 70,
+          # '粤B31234': 70,
+          # '粤B42345': 100,
+          # '粤B43456': 90,
+          # '粤B44567': 80,
+          # '粤B45678': 70,
+          # '粤B46789': 80,
+          # '粤B47890': 70,
+          # '粤B48901': 70,
+          # '粤B49012': 80,
+          # '粤B40123': 70,
+          # '粤B51234': 70,
           }
+vehicle_num = len(soc_ev)
 graph_file_path = './graph_generated/'
+pickle_file_name = 'vehicle_15_trip_50.pickle'
+# pickle_file_name = 'vehicle_40_trip_193.pickle'
+# pickle_file_name = 'vehicle_4_trip_6.pickle'
 
-# if os.path.exists(graph_file_path + 'vehicle_4_trip_6.pickle'):
-#     with open(graph_file_path + 'vehicle_4_trip_6.pickle', 'rb') as f:
-#         graph = pickle.load(f)
-#         graph = graph[0]
+def load_graph(graph_file_path, pickle_file_name):
+    if os.path.exists(graph_file_path + pickle_file_name):
+        with open(graph_file_path + pickle_file_name, 'rb') as f:
+            graph = pickle.load(f)
+            graph = graph[0]
+    return graph
 
-if os.path.exists(graph_file_path + 'vehicle_40_trip_193.pickle'):
-    with open(graph_file_path + 'vehicle_40_trip_193.pickle', 'rb') as f:
-        graph = pickle.load(f)
-        graph = graph[0]
+def path_variable_binary_check():
+    result_not_int = False
+    for i in range(edge_size):
+        if x[i].x != 1 and x[i].x != 0:
+            result_not_int = True
+
+    if result_not_int:
+        print('*******************  Result not integer!  *******************')
+
+def print_eb_path():
+    for k in range(vehicle_num):
+        print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
+        path_k = []
+        if x[k].x == 1:
+            path_k.extend(graph.edge_set[k].vertex_id_pair)
+            next_vertex_id = graph.edge_set[k].end2.vertex_id
+            while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
+                for i in graph.vertex_set[next_vertex_id].edge_id_out:
+                    if x[i].x == 1:
+                        # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
+                        path_k.append(graph.edge_set[i].end2.vertex_id)
+                        next_vertex_id = graph.edge_set[i].end2.vertex_id
+                        break
+        print("(", len(path_k) - 3, ")", path_k)
+
+def print_eb_path_with_soc_charging():
+    for k in range(vehicle_num):
+        print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
+        path_k = []
+        if x[k].x == 1:
+            path_k.extend(graph.edge_set[k].vertex_id_pair)
+            next_vertex_id = graph.edge_set[k].end2.vertex_id
+            while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
+                for i in graph.vertex_set[next_vertex_id].edge_id_out:
+                    if x[i].x == 1:
+                        # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
+                        # 现在的 [74, 10, 5] -> [83, -15, 25]
+                        # 想要的 [45, '74', 15] -> [15+25, '83', 10]
+                        path_k.append([s[graph.edge_set[i].end1.vertex_id].x + c[i].x,
+                                       str(graph.edge_set[i].end2.vertex_id),
+                                       s[graph.edge_set[i].end2.vertex_id].x,
+                                       c[i].x])
+                        next_vertex_id = graph.edge_set[i].end2.vertex_id
+                        break
+        print("(", len(path_k) - 3, ")", path_k)
+
+graph = load_graph(graph_file_path=graph_file_path, pickle_file_name=pickle_file_name)
+
 
 vertex_size, edge_size = graph.graphSize()
 time_slot_num = int(24 * 60 / graph.time_granularity)
@@ -156,44 +205,7 @@ timer_optimize_end = time.time()
 
 # model.write(".sol")
 
-result_not_int = False
-for i in range(edge_size):
-    if x[i].x != 1 and x[i].x != 0:
-        result_not_int = True
-
-if result_not_int:
-    print('*******************  Result not integer!  *******************')
-
-print(1)
-list = []
-for i in range(edge_size):
-    list.append(x[i].x)
-print(list)
-
-s_list = []
-for j in range(vertex_size):
-    s_list.append(s[j].x)
-print(s_list)
-
-# 打印 path
-for k in range(vehicle_num):
-    print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
-    path_k = []
-    if x[k].x == 1:
-        path_k.extend(graph.edge_set[k].vertex_id_pair)
-        next_vertex_id = graph.edge_set[k].end2.vertex_id
-        while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
-            for i in graph.vertex_set[next_vertex_id].edge_id_out:
-                if x[i].x == 1:
-                    # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
-                    path_k.append(
-                        str(c[i].x) + ':' + str(graph.edge_set[i].end2.vertex_id))
-                    # path_k.append(graph.edge_set[i].end2.vertex_id)
-                    next_vertex_id = graph.edge_set[i].end2.vertex_id
-                    break
-    print(path_k)
-
-
+print_eb_path_with_soc_charging()
 
 print('time (optimization) = ', timer_optimize_end - timer_optimize_start)
 
