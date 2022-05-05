@@ -7,53 +7,51 @@ import copy
 import sys
 import time
 
-trip_num = 50 # 193 50
-soc_ev = {'粤B12345': 100,
-          '粤B13456': 90,
-          '粤B14567': 80,
-          '粤B15678': 70,
-          '粤B16789': 80,
-          '粤B17890': 70,
-          '粤B18901': 70,
-          '粤B19012': 80,
-          '粤B10123': 70,
-          '粤B11234': 70,
-          '粤B22345': 100,
-          '粤B23456': 90,
-          '粤B24567': 80,
-          '粤B25678': 70,
-          '粤B26789': 80,
-          # '粤B27890': 70,
-          # '粤B28901': 70,
-          # '粤B29012': 80,
-          # '粤B20123': 70,
-          # '粤B21234': 70,
-          # '粤B32345': 100,
-          # '粤B33456': 90,
-          # '粤B34567': 80,
-          # '粤B35678': 70,
-          # '粤B36789': 80,
-          # '粤B37890': 70,
-          # '粤B38901': 70,
-          # '粤B39012': 80,
-          # '粤B30123': 70,
-          # '粤B31234': 70,
-          # '粤B42345': 100,
-          # '粤B43456': 90,
-          # '粤B44567': 80,
-          # '粤B45678': 70,
-          # '粤B46789': 80,
-          # '粤B47890': 70,
-          # '粤B48901': 70,
-          # '粤B49012': 80,
-          # '粤B40123': 70,
-          # '粤B51234': 70,
+trip_num = 30 # 193 50
+soc_ev = {'粤B12345': [0, 100],
+          '粤B13456': [1, 90],
+          '粤B14567': [2, 80],
+          '粤B15678': [3, 70],
+          '粤B16789': [4, 80],
+          '粤B17890': [5, 70],
+          '粤B18901': [6, 70],
+          '粤B19012': [7, 80],
+          '粤B10123': [8, 70],
+          '粤B11234': [9, 70],
+          '粤B22345': [10, 100],
+          '粤B23456': [11, 90],
+          # '粤B24567': [12, 80],
+          # '粤B25678': [13, 70],
+          # '粤B26789': [14, 80],
+          # '粤B27890': [15, 70],
+          # '粤B28901': [16, 70],
+          # '粤B29012': [17, 80],
+          # '粤B20123': [18, 70],
+          # '粤B21234': [19, 70],
+          # '粤B32345': [20, 100],
+          # '粤B33456': [21, 90],
+          # '粤B34567': [22, 80],
+          # '粤B35678': [23, 70],
+          # '粤B36789': [24, 80],
+          # '粤B37890': [25, 70],
+          # '粤B38901': [26, 70],
+          # '粤B39012': [27, 80],
+          # '粤B30123': [28, 70],
+          # '粤B31234': [29, 70],
+          # '粤B42345': [30, 100],
+          # '粤B43456': [31, 90],
+          # '粤B44567': [32, 80],
+          # '粤B45678': [33, 70],
+          # '粤B46789': [34, 80],
+          # '粤B47890': [35, 70],
+          # '粤B48901': [36, 70],
+          # '粤B49012': [37, 80],
+          # '粤B40123': [38, 70],
+          # '粤B51234': [39, 70],
           }
 vehicle_num = len(soc_ev)
 graph_file_path = './graph_generated/'
-pickle_file_name = 'vehicle_15_trip_50.pickle'
-# pickle_file_name = 'vehicle_40_trip_193.pickle'
-# pickle_file_name = 'vehicle_4_trip_6.pickle'
+pickle_file_name = 'vehicle_' + str(vehicle_num) +'_trip_' + str(trip_num) + '.pickle'
 
 def load_graph(graph_file_path, pickle_file_name):
     if os.path.exists(graph_file_path + pickle_file_name):
@@ -110,15 +108,13 @@ def print_eb_path_with_soc_charging():
 
 graph = load_graph(graph_file_path=graph_file_path, pickle_file_name=pickle_file_name)
 
-
 vertex_size, edge_size = graph.graphSize()
 time_slot_num = int(24 * 60 / graph.time_granularity)
 s_upper = 100
 s_lower = 10
 M = 1000000
 q_upper = 5
-q_total_upper = 5 * 20
-
+q_total_upper = 5 * 10
 
 model = gp.Model()
 x = model.addVars(edge_size, vtype=GRB.BINARY, name="x")
@@ -136,6 +132,10 @@ b = np.array([vehicle_num])
 b = np.append(b, np.zeros(vertex_size-2))
 b = np.append(b, [-vehicle_num])
 # b = np.array([1] + [0 for i in range(len(vertex_info)-1)] + [-1])
+
+# x_reassignment = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, -0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, -0.0, 1.0, -0.0, -0.0, -0.0, -0.0, -0.0, 0.0, 0.0, 0.0, -0.0, -0.0, -0.0, -0.0, -0.0, 1.0, -0.0, 0.0, 0.0, 0.0, 1.0, -0.0, -0.0, -0.0, -0.0, -0.0, -0.0, 0.0, 0.0, 0.0, -0.0, -0.0, -0.0, -0.0, 1.0, -0.0, -0.0, 0.0, 0.0, 0.0, -0.0, -0.0, 1.0, -0.0, -0.0, -0.0, -0.0, 0.0, 0.0, 0.0, -0.0, -0.0, -0.0, -0.0, -0.0, -0.0, 1.0, 0.0, 0.0, 0.0, -0.0, -0.0, -0.0, 1.0, -0.0, -0.0, -0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
+# for i in range(edge_size):
+#     model.addConstr(x[i] == x_reassignment[i])
 
 # flow constraints
 for j in range(vertex_size):
@@ -176,12 +176,15 @@ for i in range(edge_size):
 
 # charging constraints
 for i in range(edge_size):
-    initial_time_str = graph.edge_set[i].end1.start_time_str[0:11] + '00:00:00'
-    initial_time = int(time.mktime(time.strptime(initial_time_str, "%Y-%m-%d %H:%M:%S")))
+    initial_time = graph.start_time
     toi = graph.edge_set[i].end1.start_time
     doi = graph.edge_set[i].end1.duration
-    index = int((toi + doi - initial_time)/graph.time_granularity / 60)
-    model.addConstr(c[i] == gp.quicksum(q[i, t] for t in range(index, time_slot_num)))
+    tdi = graph.edge_set[i].end2.start_time
+    start_index = int((toi + doi - initial_time) / graph.time_granularity / 60)
+    end_index = int((tdi - initial_time) / graph.time_granularity / 60)
+    # constraint (1h)
+    # key constraint, whether the charging amount could be achieved physically
+    model.addConstr(c[i] == gp.quicksum(q[i, t] for t in range(start_index, end_index)))
 
 
 for t in range(time_slot_num):
@@ -209,6 +212,10 @@ print_eb_path_with_soc_charging()
 
 print('time (optimization) = ', timer_optimize_end - timer_optimize_start)
 
+x_reassigned = []
+for i in range(edge_size):
+    x_reassigned.append(x[i].x)
 
+print(x_reassigned)
 
 

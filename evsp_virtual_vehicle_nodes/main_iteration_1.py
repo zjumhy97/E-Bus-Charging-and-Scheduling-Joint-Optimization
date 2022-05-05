@@ -6,56 +6,56 @@ import numpy as np
 import copy
 import sys
 import time
+import collections
 
 import network_haoyu.EVSPGraphVehicleNode as EGraph
 
-trip_num = 20 # 193 50
-soc_ev = {'粤B12345': 100,
-          '粤B13456': 90,
-          '粤B14567': 80,
-          '粤B15678': 70,
-          '粤B16789': 80,
-          '粤B17890': 70,
-          '粤B18901': 70,
-          '粤B19012': 80,
-          '粤B10123': 70,
-          # '粤B11234': 70,
-          # '粤B22345': 100,
-          # '粤B23456': 90,
-          # '粤B24567': 80,
-          # '粤B25678': 70,
-          # '粤B26789': 80,
-          # '粤B27890': 70,
-          # '粤B28901': 70,
-          # '粤B29012': 80,
-          # '粤B20123': 70,
-          # '粤B21234': 70,
-          # '粤B32345': 100,
-          # '粤B33456': 90,
-          # '粤B34567': 80,
-          # '粤B35678': 70,
-          # '粤B36789': 80,
-          # '粤B37890': 70,
-          # '粤B38901': 70,
-          # '粤B39012': 80,
-          # '粤B30123': 70,
-          # '粤B31234': 70,
-          # '粤B42345': 100,
-          # '粤B43456': 90,
-          # '粤B44567': 80,
-          # '粤B45678': 70,
-          # '粤B46789': 80,
-          # '粤B47890': 70,
-          # '粤B48901': 70,
-          # '粤B49012': 80,
-          # '粤B40123': 70,
-          # '粤B51234': 70,
+trip_num = 50 # 193 50
+soc_ev = {'粤B12345': [0, 100],
+          '粤B13456': [1, 90],
+          '粤B14567': [2, 80],
+          '粤B15678': [3, 70],
+          '粤B16789': [4, 80],
+          '粤B17890': [5, 70],
+          '粤B18901': [6, 70],
+          '粤B19012': [7, 80],
+          '粤B10123': [8, 70],
+          '粤B11234': [9, 70],
+          '粤B22345': [10, 100],
+          '粤B23456': [11, 90],
+          '粤B24567': [12, 80],
+          '粤B25678': [13, 70],
+          # '粤B26789': [14, 80],
+          # '粤B27890': [15, 70],
+          # '粤B28901': [16, 70],
+          # '粤B29012': [17, 80],
+          # '粤B20123': [18, 70],
+          # '粤B21234': [19, 70],
+          # '粤B32345': [20, 100],
+          # '粤B33456': [21, 90],
+          # '粤B34567': [22, 80],
+          # '粤B35678': [23, 70],
+          # '粤B36789': [24, 80],
+          # '粤B37890': [25, 70],
+          # '粤B38901': [26, 70],
+          # '粤B39012': [27, 80],
+          # '粤B30123': [28, 70],
+          # '粤B31234': [29, 70],
+          # '粤B42345': [30, 100],
+          # '粤B43456': [31, 90],
+          # '粤B44567': [32, 80],
+          # '粤B45678': [33, 70],
+          # '粤B46789': [34, 80],
+          # '粤B47890': [35, 70],
+          # '粤B48901': [36, 70],
+          # '粤B49012': [37, 80],
+          # '粤B40123': [38, 70],
+          # '粤B51234': [39, 70],
           }
-vehicle_num = len(soc_ev)
+soc_ev = collections.OrderedDict(soc_ev)
+vehicle_num = soc_ev.__len__()
 graph_file_path = './graph_generated/'
 pickle_file_name = 'vehicle_' + str(vehicle_num) +'_trip_' + str(trip_num) + '.pickle'
-# pickle_file_name = 'vehicle_40_trip_193.pickle'
-# pickle_file_name = 'vehicle_4_trip_6.pickle'
 
 def load_graph(graph_file_path:str, pickle_file_name:str):
     """
@@ -112,32 +112,76 @@ def print_eb_path():
         print("(", len(path_k) - 3, ")", path_k)
     return 0
 
-def print_eb_path_with_soc_charging():
+def print_eb_path_reassigned():
     """
-    Print the path of EBs with the soc variation after solving the subproblem.
+    Print the path for all of the EBs after solving the master problem.
 
     :return: 0
     """
     for k in range(vehicle_num):
         print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
         path_k = []
-        if x[k].x == 1:
+        if x_reassignment[k] == 1:
             path_k.extend(graph.edge_set[k].vertex_id_pair)
             next_vertex_id = graph.edge_set[k].end2.vertex_id
             while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
                 for i in graph.vertex_set[next_vertex_id].edge_id_out:
-                    if x[i].x == 1:
+                    if x_reassignment[i] == 1:
                         # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
-                        # 现在的 [74, 10, 5] -> [83, -15, 25]
-                        # 想要的 [45, '74', 15] -> [15+25, '83', 10]
-                        path_k.append([s[graph.edge_set[i].end1.vertex_id].x + c[i].x,
-                                       str(graph.edge_set[i].end2.vertex_id),
-                                       graph.edge_set[i].end2.start_time_str,
-                                       s[graph.edge_set[i].end2.vertex_id].x,
-                                       c[i].x])
+                        path_k.append(graph.edge_set[i].end2.vertex_id)
                         next_vertex_id = graph.edge_set[i].end2.vertex_id
                         break
         print("(", len(path_k) - 3, ")", path_k)
+    return 0
+
+def print_eb_path_with_soc_charging(whether_reassignment:bool):
+    """
+    Print the path of EBs with the soc variation after solving the subproblem.
+
+    :return: 0
+    """
+    if whether_reassignment is False:
+        for k in range(vehicle_num):
+            print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
+            path_k = []
+            if x[k].x == 1:
+                path_k.extend(graph.edge_set[k].vertex_id_pair)
+                next_vertex_id = graph.edge_set[k].end2.vertex_id
+                while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
+                    for i in graph.vertex_set[next_vertex_id].edge_id_out:
+                        if x[i].x == 1:
+                            # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
+                            # 现在的 [74, 10, 5] -> [83, -15, 25]
+                            # 想要的 [45, '74', 15] -> [15+25, '83', 10]
+                            path_k.append([s[graph.edge_set[i].end1.vertex_id].x + c[i].x,
+                                           str(graph.edge_set[i].end2.vertex_id),
+                                           graph.edge_set[i].end2.start_time_str,
+                                           s[graph.edge_set[i].end2.vertex_id].x,
+                                           c[i].x])
+                            next_vertex_id = graph.edge_set[i].end2.vertex_id
+                            break
+            print("(", len(path_k) - 3, ")", path_k)
+    else:
+        for k in range(vehicle_num):
+            print('EB_' + str(k) + ' ' + graph.vertex_set[k+1].vertex_attribute + ' soc =' + str(graph.vertex_set[k+1].soc) )
+            path_k = []
+            if x_reassignment[k] == 1:
+                path_k.extend(graph.edge_set[k].vertex_id_pair)
+                next_vertex_id = graph.edge_set[k].end2.vertex_id
+                while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
+                    for i in graph.vertex_set[next_vertex_id].edge_id_out:
+                        if x_reassignment[i] == 1:
+                            # path_k.append(str(graph.edge_set[i].end2.vertex_id) + ':' + str(s[graph.edge_set[i].end2.vertex_id].x))
+                            # 现在的 [74, 10, 5] -> [83, -15, 25]
+                            # 想要的 [45, '74', 15] -> [15+25, '83', 10]
+                            path_k.append([s[graph.edge_set[i].end1.vertex_id].x + c[i].x,
+                                           str(graph.edge_set[i].end2.vertex_id),
+                                           graph.edge_set[i].end2.start_time_str,
+                                           s[graph.edge_set[i].end2.vertex_id].x,
+                                           c[i].x])
+                            next_vertex_id = graph.edge_set[i].end2.vertex_id
+                            break
+            print("(", len(path_k) - 3, ")", path_k)
     return 0
 
 def path_reassignment(whether_reassignment:bool):
@@ -152,6 +196,7 @@ def path_reassignment(whether_reassignment:bool):
         x_reassignment = [x[i].x for i in range(edge_size)]
         # obtain the paths from solving the master problem
         # data structure: {vehicle: soc, length_of_path, edge_id_connect_vehicle_and_trips, first_trip_vertex }
+        paths_info = {}
         for k in range(vehicle_num):
             path_k = []
             if x[k].x == 1:
@@ -164,15 +209,28 @@ def path_reassignment(whether_reassignment:bool):
                             next_vertex_id = graph.edge_set[i].end2.vertex_id
                             break
             # calculate the length of paths
-            length_of_path = len(path_k)
+            length_of_path = path_k.__len__()
             edge_id_connect_vehicle_and_trips = graph.edge_dict[(path_k[1], path_k[2])]
+            x_reassignment[edge_id_connect_vehicle_and_trips] = 0
+            # paths_info[0] = [5, 29, ]
+            paths_info[k] = [path_k.__len__(), edge_id_connect_vehicle_and_trips, path_k[2]]
 
         # vehicle sorted with soc
-
+        soc_ev_sorted = sorted(soc_ev.items(), key=lambda soc_ev: soc_ev[1][1], reverse=True)
+        soc_ev_sorted_id = []
+        for i in soc_ev_sorted:
+            soc_ev_sorted_id.append(i[1][0])
         # path sorted with length
-
+        paths_sorted = sorted(paths_info.items(), key=lambda paths_info: paths_info[1][0], reverse=True)
+        paths_sorted_id = []
+        for i in paths_sorted:
+            paths_sorted_id.append(i[0])
         # reassignment
-
+        print(soc_ev_sorted_id)
+        print(paths_sorted_id)
+        for i in range(len(soc_ev_sorted_id)):
+            edge_id = graph.edge_dict[(soc_ev_sorted_id[i] + 1, paths_info[paths_sorted_id[i]][2])]
+            x_reassignment[edge_id] = 1.0
     else:
         x_reassignment = [x[i].x for i in range(edge_size)]
     return x_reassignment
@@ -188,7 +246,7 @@ S_LOWER = 10
 BIG_M = 1000000
 Q_UPPER = 5
 Q_TOTAL_UPPER = 5 * 10
-
+whether_reassignment = True
 PROBABILITY = 0.3
 BETA = 0.5
 
@@ -230,16 +288,15 @@ while SolvedFlag is False:
     print('MP.Status = ', MP.Status)
     if MP.Status == 2:
         x_values, edge_is_1 = path_variable_binary_check()
-        print('edge_is_1 = ', edge_is_1)
-        print_eb_path()
+        # print('edge_is_1 = ', edge_is_1)
+        # print_eb_path()
         # reassignment the path according to initial soc
-        x_reassignment = path_reassignment()
+        x_reassignment = path_reassignment(whether_reassignment=whether_reassignment)
+        # print_eb_path_reassigned()
+        # print(1)
     else:
         print('MP is infeasible! need more vehicle')
         break
-
-
-
 
     # Subproblem, solve problem 4
     SP = gp.Model()
@@ -257,15 +314,13 @@ while SolvedFlag is False:
     for j_index in range(trip_num):
         j = vehicle_num + 1 + j_index
         SP.addConstr(s[j] >= S_LOWER)
-        SP.addConstr(s[j] <= S_LOWER - graph.vertex_set[j].energy_consumption)
+        SP.addConstr(s[j] <= S_UPPER - graph.vertex_set[j].energy_consumption)
     # SP.addConstr(s[vertex_size - 1] <= s_upper * vehicle_num)
     SP.addConstr(s[vertex_size - 1] == S_UPPER * vehicle_num)
 
     # soc evolution
     for j in range(vehicle_num + 1, vertex_size):
         e_j = graph.vertex_set[j].energy_consumption
-        # SP.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x[i].x * e_j for i in graph.vertex_set[j].edge_id_in))
-        # x_reassignment
         SP.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x_reassignment[i] * e_j for i in graph.vertex_set[j].edge_id_in))
 
     # bilinear constraints
@@ -317,7 +372,7 @@ while SolvedFlag is False:
 
     if SP.Status == 2:
         # optimal
-        print_eb_path_with_soc_charging()
+        print_eb_path_with_soc_charging(whether_reassignment=whether_reassignment)
         SolvedFlag = True
         print('Ha Ha Ha!')
         print('iteration = ', iteration)
@@ -388,13 +443,14 @@ while SolvedFlag is False:
         trip_info = graph.trip_info
 
         for i in range(edge_size):
+            oi = graph.edge_set[i].end1.vertex_id
+            di = graph.edge_set[i].end2.vertex_id
             toi = graph.edge_set[i].end1.start_time
             doi = graph.edge_set[i].end1.duration
             tdi = graph.edge_set[i].end2.start_time
-            if x[i].x == 1 and c[i].x > Q_UPPER * ((tdi - toi - doi) / graph.time_granularity / 60):
+            if x_reassignment[i] == 1 and c[i].x > Q_UPPER * ((tdi - toi - doi) / graph.time_granularity / 60) \
+                    and oi > vehicle_num:
                 violation_trips.append(graph.edge_set[i].end1.vertex_id)
-                oi = graph.edge_set[i].end1.vertex_id
-                di = graph.edge_set[i].end2.vertex_id
                 # trip duration modification
                 alpha = np.random.choice([0, 1], p=[PROBABILITY, 1 - PROBABILITY])
                 trip_info['trip' + str(oi - vehicle_num - 1)]['duration'] \
