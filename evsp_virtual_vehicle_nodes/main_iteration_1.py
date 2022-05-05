@@ -140,6 +140,43 @@ def print_eb_path_with_soc_charging():
         print("(", len(path_k) - 3, ")", path_k)
     return 0
 
+def path_reassignment(whether_reassignment:bool):
+    """
+    # Reassignment the EB paths according to the initial SOC.
+    # k EBs, k paths.
+
+    :param whether_reassignment:
+    :return:
+    """
+    if whether_reassignment is True:
+        x_reassignment = [x[i].x for i in range(edge_size)]
+        # obtain the paths from solving the master problem
+        # data structure: {vehicle: soc, length_of_path, edge_id_connect_vehicle_and_trips, first_trip_vertex }
+        for k in range(vehicle_num):
+            path_k = []
+            if x[k].x == 1:
+                path_k.extend(graph.edge_set[k].vertex_id_pair)
+                next_vertex_id = graph.edge_set[k].end2.vertex_id
+                while len(graph.vertex_set[next_vertex_id].edge_id_out) != 0:
+                    for i in graph.vertex_set[next_vertex_id].edge_id_out:
+                        if x[i].x == 1:
+                            path_k.append(graph.edge_set[i].end2.vertex_id)
+                            next_vertex_id = graph.edge_set[i].end2.vertex_id
+                            break
+            # calculate the length of paths
+            length_of_path = len(path_k)
+            edge_id_connect_vehicle_and_trips = graph.edge_dict[(path_k[1], path_k[2])]
+
+        # vehicle sorted with soc
+
+        # path sorted with length
+
+        # reassignment
+
+    else:
+        x_reassignment = [x[i].x for i in range(edge_size)]
+    return x_reassignment
+
 solved_number = 0
 
 graph = load_graph(graph_file_path=graph_file_path, pickle_file_name=pickle_file_name)
@@ -195,11 +232,13 @@ while SolvedFlag is False:
         x_values, edge_is_1 = path_variable_binary_check()
         print('edge_is_1 = ', edge_is_1)
         print_eb_path()
+        # reassignment the path according to initial soc
+        x_reassignment = path_reassignment()
     else:
         print('MP is infeasible! need more vehicle')
         break
 
-    # reassignment the path according to initial soc
+
 
 
     # Subproblem, solve problem 4
@@ -225,17 +264,19 @@ while SolvedFlag is False:
     # soc evolution
     for j in range(vehicle_num + 1, vertex_size):
         e_j = graph.vertex_set[j].energy_consumption
-        SP.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x[i].x * e_j for i in graph.vertex_set[j].edge_id_in))
+        # SP.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x[i].x * e_j for i in graph.vertex_set[j].edge_id_in))
+        # x_reassignment
+        SP.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x_reassignment[i] * e_j for i in graph.vertex_set[j].edge_id_in))
 
     # bilinear constraints
     for i in range(edge_size):
-        SP.addConstr(w[i] <= BIG_M * x[i].x)
-        SP.addConstr(w[i] >= s[graph.edge_set[i].end1.vertex_id] - BIG_M * (1 - x[i].x))
-        SP.addConstr(w[i] <= s[graph.edge_set[i].end1.vertex_id] + BIG_M * (1 - x[i].x))
+        SP.addConstr(w[i] <= BIG_M * x_reassignment[i])
+        SP.addConstr(w[i] >= s[graph.edge_set[i].end1.vertex_id] - BIG_M * (1 - x_reassignment[i]))
+        SP.addConstr(w[i] <= s[graph.edge_set[i].end1.vertex_id] + BIG_M * (1 - x_reassignment[i]))
 
-        SP.addConstr(m[i] <= BIG_M * x[i].x)
-        SP.addConstr(m[i] >= c[i] - BIG_M * (1 - x[i].x))
-        SP.addConstr(m[i] <= c[i] + BIG_M * (1 - x[i].x))
+        SP.addConstr(m[i] <= BIG_M * x_reassignment[i])
+        SP.addConstr(m[i] >= c[i] - BIG_M * (1 - x_reassignment[i]))
+        SP.addConstr(m[i] <= c[i] + BIG_M * (1 - x_reassignment[i]))
 
         SP.addConstr(w[i] + m[i] <= S_UPPER)
 
@@ -308,17 +349,17 @@ while SolvedFlag is False:
         # soc evolution
         for j in range(vehicle_num + 1, vertex_size):
             e_j = graph.vertex_set[j].energy_consumption
-            SPR.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x[i].x * e_j for i in graph.vertex_set[j].edge_id_in))
+            SPR.addConstr(s[j] == gp.quicksum(w[i] + m[i] - x_reassignment[i] * e_j for i in graph.vertex_set[j].edge_id_in))
 
         # bilinear constraints
         for i in range(edge_size):
-            SPR.addConstr(w[i] <= BIG_M * x[i].x)
-            SPR.addConstr(w[i] >= s[graph.edge_set[i].end1.vertex_id] - BIG_M * (1 - x[i].x))
-            SPR.addConstr(w[i] <= s[graph.edge_set[i].end1.vertex_id] + BIG_M * (1 - x[i].x))
+            SPR.addConstr(w[i] <= BIG_M * x_reassignment[i])
+            SPR.addConstr(w[i] >= s[graph.edge_set[i].end1.vertex_id] - BIG_M * (1 - x_reassignment[i]))
+            SPR.addConstr(w[i] <= s[graph.edge_set[i].end1.vertex_id] + BIG_M * (1 - x_reassignment[i]))
 
-            SPR.addConstr(m[i] <= BIG_M * x[i].x)
-            SPR.addConstr(m[i] >= c[i] - BIG_M * (1 - x[i].x))
-            SPR.addConstr(m[i] <= c[i] + BIG_M * (1 - x[i].x))
+            SPR.addConstr(m[i] <= BIG_M * x_reassignment[i])
+            SPR.addConstr(m[i] >= c[i] - BIG_M * (1 - x_reassignment[i]))
+            SPR.addConstr(m[i] <= c[i] + BIG_M * (1 - x_reassignment[i]))
 
             SPR.addConstr(w[i] + m[i] <= S_UPPER)
 
